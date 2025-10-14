@@ -1,0 +1,22 @@
+@use "../../styles/_variables.scss" as v;
+
+.countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.5rem;
+
+  .countdownTitle {
+    font-size: 2.5rem;
+    color: v.$olive-green;
+    margin-bottom: 0.5rem;
+  }
+
+  .countdownTime {
+    font-family: "Roboto", sans-serif;
+    font-size: 2.5rem;
+    color: v.$olive-green;
+    font-weight: bold;
+    text-align: center;
+  }
+}

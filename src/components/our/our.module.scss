@@ -1,0 +1,97 @@
+@import "../../styles/variables";
+
+.main {
+  width: 100%;
+  min-height: 100vh; /* altura flexível */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4rem; /* espaço entre imagens e texto */
+  padding: 2rem;
+  font-size: 1.5rem;
+  color: #333;
+  background-color: $background-color;
+
+  @media (max-width: 768px) {
+    max-height: 100%;
+    flex-direction: column;
+    padding: 2rem 1rem;
+  }
+}
+
+.text {
+  flex: 1; /* ocupa o espaço central */
+  max-width: 45vw;
+  text-align: center;
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    max-width: 90vw;
+    font-size: 1rem;
+    order: 1;
+  }
+}
+
+.text h2 {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.text p {
+  margin-bottom: 1rem;
+  font: 400 1.3rem "Open Sans", sans-serif;
+
+  @media (max-width: 768px) {
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 0rem;
+    }
+}
+
+/* --- imagens laterais --- */
+.imageWrapper,
+.imageWrapper2 {
+  position: relative;
+  flex: 0 0 20%; 
+  aspect-ratio: 1/1;
+
+  @media (max-width: 768px) {
+    order: 2;
+    width: 80%;
+    max-width: 50%;
+    max-height: 20%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+}
+
+.imageBase {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: auto !important;
+  z-index: 1;
+  @media (max-width: 768px) {
+    order: 2;
+  }
+}
+
+.imageOverlay {
+  position: absolute;
+  top: 100%;   /* metade vertical da base */
+  left: 70%;  /* metade horizontal da base */
+  width: 60% !important; /* menor que a base */
+  height: auto !important;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+
+  @media (max-width: 768px) {
+    order: 2;
+    margin-top: 0rem;
+  }
+
+}

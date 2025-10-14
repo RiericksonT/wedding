@@ -1,0 +1,213 @@
+@import "../../styles/variables";
+
+.header{
+    /* ===== MENU HAMBURGUER ===== */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+    width: 1.8rem;
+    height: 1.3rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  span {
+    height: 2px;
+    width: 100%;
+    background: #5c4033;
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  &.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  &.active span:nth-child(2) {
+    opacity: 0;
+  }
+  &.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .links {
+    display: hidden;
+    position: absolute;
+    top: 3rem;
+    right: 0;
+    width: 100%;
+    background: #fff5f0;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+    padding: 0.5em 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    z-index: 10;
+  }
+
+    .links.open {
+    max-height: 18.75rem; 
+    }
+
+  .links li a {
+    color: #5c4033;
+    font-size: 1.1rem;
+    text-decoration: none;
+    font-weight: 500;
+  }
+}
+
+    background: linear-gradient(to bottom, $background-color 90%, transparent 100%);
+    color: $olive-green;
+    font-family: 'Lavishly Yours', cursive, sans-serif;
+    border-radius: 0.2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    max-width: 100%;
+    height: 4rem;
+
+
+    position: relative; /* ou fixed se quiser que fique fixo */
+    z-index: 10;
+    display: flex;  
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+
+    .navbar{
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+
+        flex-direction: row;
+
+        .links{
+            display: flex;
+            justify-content: space-between;
+
+            li{
+                list-style: none;
+                margin: 0 1rem;
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: $olive-green;
+
+                a{
+                    text-decoration: none;
+                    color: inherit;
+
+                    &:hover{
+                        text-decoration: underline;
+                    }
+                }
+            }
+        }
+
+        img{
+            border-radius: 50%;
+            max-width: 3.5rem;
+            max-height:3.5rem;
+            object-fit: fill;
+        }
+    }
+}
+
+.main {
+  padding: 0; // remove padding para hero full screen
+  background-color: $background-color;
+  color: $olive-green;
+  font-family: 'Lavishly Yours', cursive, sans-serif;
+
+  .hero {
+    position: relative;
+    z-index: 5;
+    margin-top: -2%;
+    width: 100%;
+    height: 100vh; // ocupa toda altura da tela
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+     white-space: normal;
+        word-break: break-word;
+        overflow: visible;
+
+
+    @media (max-width: 768px) {
+        padding: 2rem 1rem;
+        font-size: 0.9rem;
+
+        h1 {
+        font-size: 2rem;
+        line-height: 5.2rem;
+        }
+
+        p {
+        font-size: 1.1rem;
+        }
+
+        /* Se o Countdown estiver dentro de um container flex, permite quebra */
+        div, span {
+        flex-wrap: wrap;
+        text-align: center;
+        justify-content: center;
+        }
+    }
+
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 0;
+    }  
+
+    .cliptriangle {
+        width: 100%;
+        height: 50%;
+        color: $olive-green;
+        background: linear-gradient(to bottom, transparent 0%, $background-color 80%);
+        clip-path: polygon(
+            0% 0%,    /* topo esquerdo */
+            50% 50%,  /* ponta do triângulo apontando para baixo */
+            100% 0%,  /* topo direito */
+            100% 100%,/* canto inferior direito */
+            0% 100%   /* canto inferior esquerdo */
+        );
+        /* opcional: sombra ou borda */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .heroText {
+        position: absolute;
+        top: 62%;
+        bottom: 0%;
+        width: 100%;
+        text-align: center;
+        color: $olive-green; 
+        .heroTitle {
+            margin: 0;
+            font-size: 5.5rem;
+        }
+    
+        .heroSubtitle {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+    }
+
+  }
+}

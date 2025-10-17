@@ -3,6 +3,7 @@ import Countdown from "../countdown/countdown";
 import Image from "next/image";
 import styles from "./home.module.scss";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function HomeSession() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -44,6 +45,9 @@ export default function HomeSession() {
             </li>
             <li>
               <a onClick={() => handleScroll("#gallery")}>Galeria</a>
+            </li>
+            <li>
+              <Link href="/lista-casamento">Lista de Presentes</Link>
             </li>
           </ul>
         </nav>

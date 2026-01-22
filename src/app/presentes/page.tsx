@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Inter, Playfair_Display } from 'next/font/google';
 import QuartoSVG from "@/components/roooms/bedroom_couple/bedroom";
+import LivingRoomSVG from "@/components/roooms/livingroom/livingroom";
 
 // Configuração das fontes
 const inter = Inter({ 
@@ -90,6 +91,14 @@ export default function Presentes() {
             Quarto Casal
           </h3>
           <QuartoSVG />
+        </div>
+      )}
+      {selectedComodo === "Sala" && (
+        <div className="w-full max-w-6xl bg-white border-4 border-[#3e503c] rounded-lg p-6">
+          <h3 className="text-2xl font-serif italic text-[#3e503c] mb-6">
+            Sala
+          </h3>
+          <LivingRoomSVG />
         </div>
       )}
     </section>

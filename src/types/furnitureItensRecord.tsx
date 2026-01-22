@@ -1,0 +1,15 @@
+export const furnitureItems: Record<string, string> = {
+  Bed: "Cama",
+  Wardrobe: "Guarda-roupa",
+  NigthStand: "Criado-mudo",
+  Decorations: "Decoração",
+  Rug: "Tapete",
+  Window: "Persiana",
+  TV: "Televisão",
+  Eletronics: "Eletrônicos",
+  Chair: "Poltrona",
+  Desk: "Escrivaninha",
+  Bookshelf: "Estante de Livros",
+  Shelving: "Estante",
+  Nigthstand: "Criado-mudo",
+};

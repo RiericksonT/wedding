@@ -2,9 +2,16 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.scss";
 import { Lavishly_Yours } from "next/font/google";
+import { Rouge_Script } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 
 const lavishlyYours = Lavishly_Yours({
+  subsets: ["latin"],
+  weight: "400",
+  style: "normal",
+});
+
+const rougeScript = Rouge_Script({
   subsets: ["latin"],
   weight: "400",
   style: "normal",
@@ -31,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={lavishlyYours.className}>
+    <html lang="pt-BR" className={rougeScript.className}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

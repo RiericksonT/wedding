@@ -2,13 +2,25 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Inter, Playfair_Display } from 'next/font/google';
+import QuartoSVG from "@/components/roooms/bedroom_couple/bedroom";
+
+// Configuração das fontes
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-playfair',
+});
 
 export default function Presentes() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [selectedComodo, setSelectedComodo] = useState("");
 
-  // Pega o nome do sessionStorage (ou coloca um padrão)
   useEffect(() => {
     const storedName = sessionStorage.getItem("name");
     if (storedName) setName(storedName);
@@ -25,100 +37,63 @@ export default function Presentes() {
   ];
 
   const handleComodoClick = (comodo: string) => {
-    setSelectedComodo(comodo); // <-- marca o cômodo selecionado
+    setSelectedComodo(comodo);
     sessionStorage.setItem("comodoSelecionado", comodo);
-    // Não redireciona ainda, só mostra o SVG
   };
 
   return (
-    <section className="w-full min-h-screen flex flex-col items-center justify-start bg-[#f9f6f2] px-6 md:px-12 py-16">
-      {/* Botão de voltar */}
+    <section className={`${inter.variable} ${playfair.variable} w-full min-h-screen flex flex-col items-center bg-[#f9f6f2] px-6 md:px-12 py-16 relative`}>
+      {/* Voltar */}
       <button
         onClick={() => router.back()}
-        className="absolute top-6 left-6 flex items-center gap-3 text-[#3e503c] font-semibold text-2xl hover:opacity-80 transition-opacity cursor-pointer"
+        className="absolute top-6 left-6 text-[#3e503c] font-semibold text-2xl hover:opacity-80 font-sans"
       >
         ← Voltar
       </button>
 
-      {/* Saudação personalizada */}
-      <h2 className="text-4xl md:text-5xl lg:text-6xl italic text-[#3e503c] mb-6 text-center">
+      {/* Saudação */}
+      <h2 className="text-4xl md:text-5xl italic text-[#3e503c] mb-4 text-center font-serif">
         Oi, {name || "convidado"}! 👋
       </h2>
-      <p className="text-[#3e503c] italic leading-relaxed text-lg md:text-xl font-serif text-center max-w-3xl mb-12">
-        Escolha o cômodo que você quer explorar ou presentear!
+
+      <p className="text-[#3e503c] italic text-lg md:text-xl text-center max-w-3xl mb-6 font-sans">
+        Escolha o que você gostaria de presentear
+      </p>
+      
+      <p className="text-[#3e503c] text-center max-w-3xl mb-10 font-sans">
+        <span className="font-semibold">Como funciona:</span> Clique nos móveis para ver opções, 
+        escolha uma e adicione à sua lista. Depois reserve pelo WhatsApp!
       </p>
 
-      {/* Linha de botões de cômodos */}
-      <div className="flex flex-wrap justify-center gap-6 mb-12">
+      {/* Botões */}
+      <div className="flex flex-wrap justify-center gap-4 mb-12">
         {comodos.map((comodo) => (
           <button
             key={comodo}
             onClick={() => handleComodoClick(comodo)}
-            className={`bg-[#3e503c] text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-[#2c3b2a] transition-colors ${
-              selectedComodo === comodo ? "ring-4 ring-[#3e503c]" : ""
-            }`}
+            className={`py-3 px-6 rounded-lg text-lg font-semibold transition-all duration-300 font-sans
+              ${
+                selectedComodo === comodo
+                  ? "bg-[#2c3b2a] text-white ring-4 ring-[#3e503c] scale-110"
+                  : "bg-[#3e503c] text-white hover:bg-[#2c3b2a] hover:scale-105"
+              }`}
           >
             {comodo}
           </button>
         ))}
       </div>
 
-      {/* SVG Interativo */}
-      {selectedComodo && (
-        <div className="w-full max-w-4xl border-4 border-[#3e503c] rounded-lg p-4 bg-white">
-          <h3 className="text-2xl font-serif italic text-[#3e503c] mb-4">
-            {selectedComodo}
+      {/* Área do SVG */}
+      {selectedComodo === "Quarto Casal" && (
+        <div className="w-full max-w-6xl bg-white border-4 border-[#3e503c] rounded-lg p-6">
+          <h3 className="text-2xl font-serif italic text-[#3e503c] mb-6">
+            Quarto Casal
           </h3>
-
-          {selectedComodo === "Sala" && <SalaSVG />}
-          {selectedComodo === "Cozinha" && <CozinhaSVG />}
-          {/* Adicione outros cômodos aqui */}
+          <QuartoSVG />
         </div>
       )}
     </section>
   );
 }
 
-// Exemplo de SVG de Sala
-function SalaSVG() {
-  const [hovered, setHovered] = useState<string | null>(null);
 
-  const moveis = ["Sofá", "Mesa", "Cadeira", "Estante"];
-
-  return (
-    <svg viewBox="0 0 600 400" className="w-full h-80">
-      {moveis.map((m, i) => (
-        <rect
-          key={m}
-          x={50 + i * 120}
-          y={100}
-          width={100}
-          height={60}
-          fill={hovered === m ? "#facc15" : "#a3a3a3"}
-          stroke="#3e503c"
-          strokeWidth={2}
-          rx={8}
-          ry={8}
-          onMouseEnter={() => setHovered(m)}
-          onMouseLeave={() => setHovered(null)}
-        >
-          <title>{m}</title>
-        </rect>
-      ))}
-    </svg>
-  );
-}
-
-// Exemplo de SVG de Cozinha (mais simples)
-function CozinhaSVG() {
-  return (
-    <svg viewBox="0 0 600 400" className="w-full h-80">
-      <rect x={50} y={100} width={150} height={80} fill="#a3a3a3" stroke="#3e503c" strokeWidth={2} rx={8} ry={8}>
-        <title>Geladeira</title>
-      </rect>
-      <rect x={250} y={100} width={200} height={80} fill="#a3a3a3" stroke="#3e503c" strokeWidth={2} rx={8} ry={8}>
-        <title>Balcão</title>
-      </rect>
-    </svg>
-  );
-}

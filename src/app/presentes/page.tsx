@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Inter, Playfair_Display } from 'next/font/google';
 import QuartoSVG from "@/components/roooms/bedroom_couple/bedroom";
 import LivingRoomSVG from "@/components/roooms/livingroom/livingroom";
+import KitchenSVG from "@/components/roooms/kitchen/kitchen";
 
 // Configuração das fontes
 const inter = Inter({ 
@@ -31,9 +32,7 @@ export default function Presentes() {
     "Sala",
     "Cozinha",
     "Quarto Casal",
-    "Quarto Infantil",
     "Banheiro",
-    "Escritório",
     "Varanda",
   ];
 
@@ -99,6 +98,14 @@ export default function Presentes() {
             Sala
           </h3>
           <LivingRoomSVG />
+        </div>
+      )}
+      {selectedComodo === "Cozinha" && (
+        <div className="w-full max-w-6xl bg-white border-4 border-[#3e503c] rounded-lg p-6">
+          <h3 className="text-2xl font-serif italic text-[#3e503c] mb-6">
+            Cozinha
+          </h3>
+          <KitchenSVG />
         </div>
       )}
     </section>

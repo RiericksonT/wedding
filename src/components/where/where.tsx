@@ -24,14 +24,13 @@ export default function Where() {
         {/* Texto lateral */}
         <div className="flex-1 text-[#3e503c] italic leading-relaxed text-base md:text-lg font-serif text-center md:text-left">
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-            condimentum quam vel felis pretium, vitae feugiat neque facilisis.
-            Integer mattis elit at magna cursus, nec imperdiet massa interdum.
+            Nossa cerimônia de casamento será realizada na Igreja Adventista Central de Belo Jardim, em um momento especial de fé e celebração do amor. Após a cerimônia, receberemos nossos convidados para a recepção no Palazzo Recepções, também em Belo Jardim.
+            O início da cerimônia está marcado para 19h30, e pedimos com carinho que todos cheguem no horário, para que possamos começar pontualmente e aproveitar cada momento sem que o evento se estenda até muito tarde.
+            Nosso casamento acontecerá no dia 23 de setembro de 2026, uma quarta-feira.
           </p>
           <p className="mt-4">
-            Donec sagittis, risus eu bibendum gravida, neque justo malesuada
-            elit, vel porta lectus ligula nec nunc. Proin vitae urna ac libero
-            aliquam sagittis.
+            Escolhemos esse horário um pouco mais tarde justamente para facilitar a organização de todos, já que será em dia de semana.
+            Será uma alegria imensa compartilhar esse dia tão especial com vocês e esperamos que todos possam se juntar a nós nessa celebração de amor, fé e união.
           </p>
 
           {/* Linha inferior com ícones */}
@@ -49,7 +48,7 @@ export default function Where() {
                 <circle cx="12" cy="12" r="10" stroke="currentColor" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l3 3" />
               </svg>
-              <span className="text-lg md:text-xl font-bold mt-2">19:00 h</span>
+              <span className="text-lg md:text-xl font-bold mt-2">19:30 h</span>
             </div>
 
             {/* Data */}

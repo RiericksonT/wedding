@@ -26,7 +26,6 @@ export const furnitureItems: Record<string, string> = {
   HomeAppliances: "Eletrodomésticos",
   KitchenUtensils: "Utensílios de Cozinha",
   Table: "Mesa de Jantar",
-  Microwave: "Micro-ondas",
   Sink: "Pia",
   Cooktop: "Cooktop",
   RangeHood: "Coifa",
@@ -39,5 +38,5 @@ export const furnitureItems: Record<string, string> = {
 export const roomCategories = {
   "Quarto Casal": ["Bed", "Wardrobe", "NigthStand", "Decorations", "Rug", "Window", "TV", "Eletronics", "Chair", "Desk", "Shelving", "Bookshelf"],
   "Sala": ["CoffeeTable", "Eletronics", "Shelf", "HomeAppliance", "Window", "Sofa", "Lights", "Cabinet", "Decoration", "AirConditioner", "Rug", "Else"],
-  "Cozinha": ["Freezer", "HomeAppliances", "KitchenUtensils", "Table", "Microwave", "Sink", "Cooktop", "RangeHood", "KitchenCabinets", "Else"]
+  "Cozinha": ["Freezer", "HomeAppliances", "KitchenUtensils", "Table", "Sink", "Cooktop", "RangeHood", "KitchenCabinets", "Else"]
 } as const;

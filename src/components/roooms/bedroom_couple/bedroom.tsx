@@ -28,7 +28,17 @@ interface FurnitureData {
   options: GiftOption[];
 }
 
-export default function QuartoSVG() {
+interface RoomGiftSelectionProps {
+  onAddGift?: (gift: SelectedGift) => void;
+  sharedSelectedGifts?: SelectedGift[];
+  hideLocalList?: boolean;
+}
+
+export default function QuartoSVG({
+  onAddGift,
+  sharedSelectedGifts = [],
+  hideLocalList = false
+}: RoomGiftSelectionProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [selectedFurniture, setSelectedFurniture] = useState<string | null>(null);
   const [selectedGifts, setSelectedGifts] = useState<SelectedGift[]>([]);
@@ -164,9 +174,15 @@ export default function QuartoSVG() {
     if (!selectedFurniture) return;
     
     const furnitureName = furnitureItems[selectedFurniture];
+    const selectedGift: SelectedGift = {
+      furnitureId: selectedFurniture,
+      furnitureName,
+      option
+    };
+    const giftsToCheck = sharedSelectedGifts.length > 0 ? sharedSelectedGifts : selectedGifts;
     
     // Verifica se já existe esta opção selecionada
-    const existingIndex = selectedGifts.findIndex(
+    const existingIndex = giftsToCheck.findIndex(
       gift => gift.furnitureId === selectedFurniture && gift.option.id === option.id
     );
     
@@ -174,12 +190,9 @@ export default function QuartoSVG() {
       // Adiciona nova opção
       setSelectedGifts(prev => [
         ...prev,
-        {
-          furnitureId: selectedFurniture,
-          furnitureName,
-          option
-        }
+        selectedGift
       ]);
+      onAddGift?.(selectedGift);
     }
     
     setSelectedFurniture(null); // Fecha o modal
@@ -470,7 +483,7 @@ export default function QuartoSVG() {
       )}
 
       {/* Modal para dados do usuário */}
-      {showReservationModal && (
+      {!hideLocalList && showReservationModal && (
         <UserInfoModal
           userName={userName}
           userPhone={userPhone}
@@ -480,12 +493,14 @@ export default function QuartoSVG() {
       )}
 
       {/* Lista de Presentes Selecionados */}
-      <GiftList 
-        selectedGifts={selectedGifts}
-        onRemove={handleRemoveGift}
-        onReserve={handleReserveViaWhatsApp}
-        userName={userName}
-      />
+      {!hideLocalList && (
+        <GiftList 
+          selectedGifts={selectedGifts}
+          onRemove={handleRemoveGift}
+          onReserve={handleReserveViaWhatsApp}
+          userName={userName}
+        />
+      )}
 
       {/* CSS DO SVG */}
       <style jsx global>{`

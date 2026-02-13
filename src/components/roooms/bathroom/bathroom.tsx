@@ -1,26 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Livingroom from "@/assets/livingroom.svg"; // Altere para seu SVG da sala
+import { useState, useEffect, useRef } from "react";
+import Bathroom from "@/assets/bathroom.svg";
 import { furnitureItems } from "@/types/furnitureItensRecord";
 import { GiftOption } from "@/types/giftOptionInterface";
 import { SelectedGift } from "@/types/selectedGiftInterface";
 
-// Mapeamento entre IDs do SVG e categorias do Google Sheets PARA SALA
-const livingRoomSvgToCategoryMap: Record<string, string> = {
-  CoffeeTable: "mesa-centro",
-  Eletronics: "eletronicos-sala",
-  Shelf: "estante-sala",
-  HomeAppliance: "eletrodomestico",
-  Window: "janela-cortina",
-  Sofa: "sofa",
-  Lights: "iluminacao",
-  Cabinet: "armario-sala",
-  Decoration: "decoracao-sala",
-  AirConditioner: "ar-condicionado",
-  Rug: "tapete-sala",
-  Else: "outros"
+// Mapeamento entre IDs do SVG e categorias do Google Sheets
+const svgToCategoryMap: Record<string, string> = {
+  Shower: "chuveiro",
+  Toilet: "vaso-sanitario",
+  Acessories: "acessorios-banheiro",
 };
+const interactiveBathroomIds = new Set(["Shower", "Toilet", "Acessories"]);
 
 interface FurnitureData {
   name: string;
@@ -34,7 +26,7 @@ interface RoomGiftSelectionProps {
   hideLocalList?: boolean;
 }
 
-export default function LivingRoomSVG({
+export default function BathroomSVG({
   onAddGift,
   sharedSelectedGifts = [],
   hideLocalList = false
@@ -48,12 +40,12 @@ export default function LivingRoomSVG({
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [userPhone, setUserPhone] = useState("");
+  const isFetchingRef = useRef(false);
+  const lastFetchAtRef = useRef(0);
 
-  // Buscar dados do Google Sheets quando o componente montar
   useEffect(() => {
     fetchFurnitureData();
     
-    // Recuperar dados do usuário do sessionStorage
     const storedName = sessionStorage.getItem("name") || "";
     const storedPhone = sessionStorage.getItem("phone") || "";
     setUserName(storedName);
@@ -61,6 +53,14 @@ export default function LivingRoomSVG({
   }, []);
 
   const fetchFurnitureData = async () => {
+    const now = Date.now();
+    if (isFetchingRef.current || now - lastFetchAtRef.current < 800) {
+      return;
+    }
+
+    isFetchingRef.current = true;
+    lastFetchAtRef.current = now;
+
     try {
       setLoading(true);
       const response = await fetch('/api/gifts');
@@ -68,17 +68,16 @@ export default function LivingRoomSVG({
       
       const allGifts: GiftOption[] = await response.json();
       
-      // Organizar dados por categoria para SALA
       const organizedData: Record<string, FurnitureData> = {};
       
-      Object.entries(livingRoomSvgToCategoryMap).forEach(([svgId, category]) => {
+      Object.entries(svgToCategoryMap).forEach(([svgId, category]) => {
         const categoryGifts = allGifts.filter(gift => 
           gift.category?.toLowerCase() === category.toLowerCase()
         );
         
         if (categoryGifts.length > 0) {
           organizedData[svgId] = {
-            name: getFurnitureName(svgId),
+            name: furnitureItems[svgId] || category,
             description: getCategoryDescription(category),
             options: categoryGifts.map(gift => ({
               ...gift,
@@ -97,89 +96,55 @@ export default function LivingRoomSVG({
       setFurnitureOptions(getFallbackData());
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  };
-
-  const getFurnitureName = (svgId: string): string => {
-    // Se já estiver no furnitureItems, use
-    if (furnitureItems[svgId]) {
-      return furnitureItems[svgId];
-    }
-    
-    // Caso contrário, use mapeamento direto
-    const nameMap: Record<string, string> = {
-      CoffeeTable: "Mesa de Centro",
-      Eletronics: "Eletrônicos",
-      Shelf: "Estante",
-      HomeAppliance: "Eletrodoméstico",
-      Window: "Janela/Cortina",
-      Sofa: "Sofá",
-      Lights: "Iluminação",
-      Cabinet: "Armário",
-      Decoration: "Decoração",
-      AirConditioner: "Ar Condicionado",
-      Rug: "Tapete",
-      Else: "Outros"
-    };
-    
-    return nameMap[svgId] || svgId;
   };
 
   const getCategoryDescription = (category: string): string => {
     const descriptions: Record<string, string> = {
-      "mesa-centro": "Para nossos momentos de convívio",
-      "eletronicos-sala": "Tecnologia para entretenimento",
-      "estante-sala": "Para organizar livros e decorações",
-      "eletrodomestico": "Conforto e praticidade no dia a dia",
-      "janela-cortina": "Luz e privacidade para nossa sala",
-      "sofa": "Conforto para relaxar e receber visitas",
-      "iluminacao": "Luz aconchegante para cada momento",
-      "armario-sala": "Organização e armazenamento",
-      "decoracao-sala": "Toques pessoais para nosso lar",
-      "ar-condicionado": "Climatização para nosso conforto",
-      "tapete-sala": "Conforto e estilo para o piso",
-      "outros": "Itens especiais para nossa sala"
+      "chuveiro": "Conforto para nossos banhos",
+      "vaso-sanitario": "Item essencial para o dia a dia",
+      "acessorios-banheiro": "Organização e praticidade para o banheiro",
     };
     
-    return descriptions[category.toLowerCase()] || "Item especial para nossa sala";
+    return descriptions[category.toLowerCase()] || "Item especial para nosso banheiro";
   };
 
   const getFallbackData = (): Record<string, FurnitureData> => {
     return {
-      Sofa: {
-        name: "Sofá",
-        description: "Conforto para relaxar e receber visitas",
+      Shower: {
+        name: "Chuveiro",
+        description: "Conforto para nossos banhos",
         options: [
           {
-            id: "sofa-1",
-            name: "Sofá Retrátil 3 Lugares",
-            description: "Sofá em veludo com assento retrátil",
-            estimatedValue: 1999.90,
-            image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            storeLink: "https://www.mobly.com.br/sofa-retratil"
+            id: "chuveiro-1",
+            name: "Chuveiro Eletrônico",
+            description: "Chuveiro com controle de temperatura e bom fluxo",
+            estimatedValue: 349.90,
+            image: "https://images.unsplash.com/photo-1584622781564-1d987f7333c1",
+            storeLink: "https://www.magazineluiza.com.br"
           },
         ]
       },
-      CoffeeTable: {
-        name: "Mesa de Centro",
-        description: "Para nossos momentos de convívio",
+      Toilet: {
+        name: "Vaso Sanitário",
+        description: "Item essencial para o dia a dia",
         options: [
           {
-            id: "mesa-centro-1",
-            name: "Mesa de Centro em Vidro",
-            description: "Mesa com tampo em vidro temperado",
-            estimatedValue: 699.90,
-            image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-            storeLink: "https://www.madeiramadeira.com.br/mesa-centro-vidro"
+            id: "vaso-sanitario-1",
+            name: "Vaso Sanitário com Caixa Acoplada",
+            description: "Modelo moderno com bom acabamento",
+            estimatedValue: 899.90,
+            image: "https://images.unsplash.com/photo-1620626011761-996317b8d101",
+            storeLink: "https://www.magazineluiza.com.br"
           },
         ]
       },
-      // Adicione outros dados de fallback conforme necessário
     };
   };
 
   const handleMouseOver = (e: React.MouseEvent, itemId: string) => {
-    if (!itemId || itemId === "Else") return;
+    if (!itemId || itemId === "Else" || itemId === "Bathroom") return;
     setHoveredItem(itemId);
     
     const rect = e.currentTarget.getBoundingClientRect();
@@ -194,19 +159,19 @@ export default function LivingRoomSVG({
   };
 
   const handleFurnitureClick = (itemId: string) => {
-    if (!itemId || itemId === "Else") return;
+    if (!itemId || itemId === "Else" || itemId === "Bathroom") return;
     
     if (furnitureOptions[itemId] && furnitureOptions[itemId].options.length > 0) {
       setSelectedFurniture(itemId);
     } else {
-      alert(`Desculpe, não há opções disponíveis para ${getFurnitureName(itemId)} no momento.`);
+      alert(`Desculpe, não há opções disponíveis para ${furnitureItems[itemId]} no momento.`);
     }
   };
 
   const handleSelectOption = (option: GiftOption) => {
     if (!selectedFurniture) return;
     
-    const furnitureName = getFurnitureName(selectedFurniture);
+    const furnitureName = furnitureItems[selectedFurniture];
     const selectedGift: SelectedGift = {
       furnitureId: selectedFurniture,
       furnitureName,
@@ -254,7 +219,7 @@ export default function LivingRoomSVG({
               giftId: gift.option.id,
               reservedBy: userName,
               phone: userPhone,
-              additionalInfo: `Sala: ${gift.furnitureName} - ${gift.option.name}`
+              additionalInfo: `Reserva via site: ${gift.furnitureName} - ${gift.option.name}`
             }),
           });
 
@@ -283,7 +248,7 @@ export default function LivingRoomSVG({
       
       const totalValue = successfulGifts.reduce((total, gift) => total + gift.option.estimatedValue, 0);
       
-      let whatsappMessage = `Olá! Gostaria de reservar os seguintes presentes para a SALA:\n\n${itemsText}\n\n💰 Valor total estimado: R$ ${totalValue.toFixed(2).replace('.', ',')}\n\nMeu nome: ${userName}\nMeu telefone: ${userPhone}`;
+      let whatsappMessage = `Olá! Gostaria de reservar os seguintes presentes:\n\n${itemsText}\n\n💰 Valor total estimado: R$ ${totalValue.toFixed(2).replace('.', ',')}\n\nMeu nome: ${userName}\nMeu telefone: ${userPhone}`;
       
       if (successfulReservations < selectedGifts.length) {
         const failedGifts = selectedGifts.filter((_, index) => !reservationResults[index].success);
@@ -293,12 +258,10 @@ export default function LivingRoomSVG({
       whatsappMessage += `\n\nPor favor, confirmem a reserva!`;
       
       const encodedMessage = encodeURIComponent(whatsappMessage);
-      
       const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5511999999999";
       window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
       
       fetchFurnitureData();
-      
       setSelectedGifts(prev => prev.filter((_, index) => !reservationResults[index].success));
     } else {
       alert("Não foi possível reservar nenhum dos itens selecionados. Eles podem já ter sido reservados por outra pessoa.");
@@ -308,20 +271,30 @@ export default function LivingRoomSVG({
   const handleSaveUserInfo = (name: string, phone: string) => {
     setUserName(name);
     setUserPhone(phone);
-    
     sessionStorage.setItem("name", name);
     sessionStorage.setItem("phone", phone);
-    
     setShowReservationModal(false);
-    
     setTimeout(() => handleReserveViaWhatsApp(), 100);
   };
 
   const currentFurniture = selectedFurniture ? furnitureOptions[selectedFurniture] : null;
+  const getBathroomItemId = (target: EventTarget | null): string => {
+    if (!(target instanceof Element)) return "";
+
+    let currentElement: Element | null = target;
+    while (currentElement) {
+      const currentId = currentElement.id || "";
+      if (interactiveBathroomIds.has(currentId)) {
+        return currentId;
+      }
+      currentElement = currentElement.parentElement;
+    }
+
+    return "";
+  };
 
   return (
     <div className="relative">
-      {/* Tooltip flutuante */}
       {hoveredItem && furnitureOptions[hoveredItem] && (
         <div 
           className="fixed z-20 px-4 py-2 bg-[#f3efe9] border-2 border-[#3e503c] rounded-lg shadow-lg pointer-events-none animate-fadeIn"
@@ -331,7 +304,7 @@ export default function LivingRoomSVG({
           }}
         >
           <p className="text-[#3e503c] font-semibold font-sans text-sm">
-            {getFurnitureName(hoveredItem)}
+            {furnitureItems[hoveredItem]}
           </p>
           <p className="text-[#2c3b2a] text-xs font-sans">
             {furnitureOptions[hoveredItem].description}
@@ -342,32 +315,26 @@ export default function LivingRoomSVG({
         </div>
       )}
 
-      {/* SVG Container */}
       <div className="relative w-full flex justify-center mb-8">
-        <div className="relative w-full max-w-3xl">
-          <Livingroom
-            className="w-full h-auto livingroom-svg"
+        <div className="relative w-full max-w-2xl">
+          <Bathroom
+            className="w-[90%] h-auto mx-auto bathroom-svg"
             onMouseOver={(e: React.MouseEvent) => {
-              const target = e.target as HTMLElement;
-              const g = target.closest("g");
-              const id = g?.id || "";
+              const id = getBathroomItemId(e.target);
               handleMouseOver(e, id);
             }}
             onMouseOut={handleMouseOut}
             onClick={(e: React.MouseEvent) => {
-              const target = e.target as HTMLElement;
-              const g = target.closest("g");
-              const id = g?.id || "";
+              const id = getBathroomItemId(e.target);
               handleFurnitureClick(id);
             }}
           />
         </div>
       </div>
 
-      {/* Instruções */}
       <div className="text-center mb-8 p-4 bg-[#f3efe9] rounded-lg border border-[#d6d1c4]">
         <p className="text-[#3e503c] font-sans mb-2">
-          <span className="font-semibold">Como presentear nossa Sala:</span> Passe o mouse sobre os móveis e clique para ver opções
+          <span className="font-semibold">Como presentear:</span> Passe o mouse sobre os itens e clique para ver opções
         </p>
         <p className="text-[#3e503c] text-sm font-sans">
           Escolha uma opção de presente e adicione à sua lista de reserva
@@ -379,7 +346,6 @@ export default function LivingRoomSVG({
         )}
       </div>
 
-      {/* Modal de Opções */}
       {selectedFurniture && currentFurniture && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -405,9 +371,6 @@ export default function LivingRoomSVG({
                 <p className="text-[#3e503c] font-sans">
                   Todas as opções desta categoria já foram reservadas.
                 </p>
-                <p className="text-sm text-[#3e503c] mt-2 font-sans">
-                  Por favor, escolha outro item para presentear.
-                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -424,7 +387,6 @@ export default function LivingRoomSVG({
                       }`}
                     >
                       <div className="flex flex-col md:flex-row gap-4">
-                        {/* Imagem do produto */}
                         <div className="md:w-1/3">
                           <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                             {option.image ? (
@@ -435,16 +397,12 @@ export default function LivingRoomSVG({
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                <div className="text-center p-4">
-                                  <div className="w-full h-32 bg-gray-200 rounded mb-2"></div>
-                                  <span className="text-xs">{option.name}</span>
-                                </div>
+                                <span className="text-xs">{option.name}</span>
                               </div>
                             )}
                           </div>
                         </div>
                         
-                        {/* Detalhes do produto */}
                         <div className="md:w-2/3">
                           <div className="flex justify-between items-start">
                             <h4 className="text-lg font-semibold text-[#2c3b2a] font-sans">
@@ -467,7 +425,6 @@ export default function LivingRoomSVG({
                             </span>
                             
                             <div className="flex gap-2">
-                              {/* Botão para ver na loja (se tiver link) */}
                               {option.storeLink && !isReserved && (
                                 <a
                                   href={option.storeLink}
@@ -479,7 +436,6 @@ export default function LivingRoomSVG({
                                 </a>
                               )}
                               
-                              {/* Botão para adicionar à lista */}
                               <button
                                 onClick={() => !isReserved && handleSelectOption(option)}
                                 disabled={isReserved}
@@ -504,7 +460,6 @@ export default function LivingRoomSVG({
         </div>
       )}
 
-      {/* Modal para dados do usuário */}
       {!hideLocalList && showReservationModal && (
         <UserInfoModal
           userName={userName}
@@ -514,31 +469,32 @@ export default function LivingRoomSVG({
         />
       )}
 
-      {/* Lista de Presentes Selecionados */}
       {!hideLocalList && (
         <GiftList 
           selectedGifts={selectedGifts}
           onRemove={handleRemoveGift}
           onReserve={handleReserveViaWhatsApp}
           userName={userName}
-          roomName="Sala"
         />
       )}
 
-      {/* CSS DO SVG */}
       <style jsx global>{`
-        .livingroom-svg {
+        .bathroom-svg {
           position: relative;
           z-index: 1;
         }
         
-        .livingroom-svg g {
+        .bathroom-svg #Acessories,
+        .bathroom-svg #Toilet,
+        .bathroom-svg #Shower {
           opacity: 1;
           transition: all 0.3s ease;
           cursor: pointer;
         }
-        
-        .livingroom-svg g:hover {
+
+        .bathroom-svg #Acessories:hover,
+        .bathroom-svg #Toilet:hover,
+        .bathroom-svg #Shower:hover {
           filter: drop-shadow(0 0 12px rgba(62, 80, 60, 0.4)) 
                   brightness(1.05);
         }
@@ -556,27 +512,25 @@ export default function LivingRoomSVG({
   );
 }
 
-// Componente para a lista de presentes (ATUALIZADO para incluir roomName)
+// Componentes auxiliares (GiftList e UserInfoModal - mesmos do Quarto)
 function GiftList({ 
   selectedGifts, 
   onRemove, 
   onReserve,
-  userName,
-  roomName = "Sala"
+  userName 
 }: { 
   selectedGifts: SelectedGift[];
   onRemove: (id: string) => void;
   onReserve: () => void;
   userName?: string;
-  roomName?: string;
 }) {
   if (selectedGifts.length === 0) {
     return (
       <div className="text-center py-8 text-[#3e503c]">
-        <div className="mb-4 text-4xl">🛋️</div>
-        <p className="text-lg font-sans mb-2">Sua lista de reserva para a {roomName} está vazia</p>
+        <div className="mb-4 text-4xl">🎁</div>
+        <p className="text-lg font-sans mb-2">Sua lista de reserva está vazia</p>
         <p className="text-sm text-[#3e503c] font-sans">
-          Clique nos móveis para ver opções e adicionar presentes
+          Clique nos itens para ver opções e adicionar presentes
         </p>
       </div>
     );
@@ -589,21 +543,19 @@ function GiftList({
       <div className="flex justify-between items-center mb-6">
         <div>
           <h4 className="text-2xl font-serif italic text-[#3e503c]">
-            Sua Lista para a {roomName} 🎁
+            Sua Lista de Reserva 🎁
           </h4>
           <p className="text-[#3e503c] text-sm font-sans mt-1">
             {selectedGifts.length} {selectedGifts.length === 1 ? 'item selecionado' : 'itens selecionados'}
           </p>
         </div>
         
-        <div className="flex gap-2">
-          <button
-            onClick={() => selectedGifts.forEach(g => onRemove(g.option.id))}
-            className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-sans"
-          >
-            Limpar tudo
-          </button>
-        </div>
+        <button
+          onClick={() => selectedGifts.forEach(g => onRemove(g.option.id))}
+          className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-sans"
+        >
+          Limpar tudo
+        </button>
       </div>
 
       <div className="space-y-4 mb-8">
@@ -657,7 +609,6 @@ function GiftList({
         ))}
       </div>
 
-      {/* Resumo e botão de reserva */}
       <div className="border-t border-[#d6d1c4] pt-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div>
@@ -691,7 +642,6 @@ function GiftList({
   );
 }
 
-// Componente para o modal de dados do usuário (MESMO)
 interface UserInfoModalProps {
   userName: string;
   userPhone: string;

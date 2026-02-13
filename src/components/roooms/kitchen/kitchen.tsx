@@ -25,7 +25,17 @@ interface FurnitureData {
   options: GiftOption[];
 }
 
-export default function KitchenSVG() {
+interface RoomGiftSelectionProps {
+  onAddGift?: (gift: SelectedGift) => void;
+  sharedSelectedGifts?: SelectedGift[];
+  hideLocalList?: boolean;
+}
+
+export default function KitchenSVG({
+  onAddGift,
+  sharedSelectedGifts = [],
+  hideLocalList = false
+}: RoomGiftSelectionProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [selectedFurniture, setSelectedFurniture] = useState<string | null>(null);
   const [selectedGifts, setSelectedGifts] = useState<SelectedGift[]>([]);
@@ -162,20 +172,23 @@ export default function KitchenSVG() {
     if (!selectedFurniture) return;
     
     const furnitureName = furnitureItems[selectedFurniture];
+    const selectedGift: SelectedGift = {
+      furnitureId: selectedFurniture,
+      furnitureName,
+      option
+    };
+    const giftsToCheck = sharedSelectedGifts.length > 0 ? sharedSelectedGifts : selectedGifts;
     
-    const existingIndex = selectedGifts.findIndex(
+    const existingIndex = giftsToCheck.findIndex(
       gift => gift.furnitureId === selectedFurniture && gift.option.id === option.id
     );
     
     if (existingIndex === -1) {
       setSelectedGifts(prev => [
         ...prev,
-        {
-          furnitureId: selectedFurniture,
-          furnitureName,
-          option
-        }
+        selectedGift
       ]);
+      onAddGift?.(selectedGift);
     }
     
     setSelectedFurniture(null);
@@ -437,7 +450,7 @@ export default function KitchenSVG() {
         </div>
       )}
 
-      {showReservationModal && (
+      {!hideLocalList && showReservationModal && (
         <UserInfoModal
           userName={userName}
           userPhone={userPhone}
@@ -446,12 +459,14 @@ export default function KitchenSVG() {
         />
       )}
 
-      <GiftList 
-        selectedGifts={selectedGifts}
-        onRemove={handleRemoveGift}
-        onReserve={handleReserveViaWhatsApp}
-        userName={userName}
-      />
+      {!hideLocalList && (
+        <GiftList 
+          selectedGifts={selectedGifts}
+          onRemove={handleRemoveGift}
+          onReserve={handleReserveViaWhatsApp}
+          userName={userName}
+        />
+      )}
 
       <style jsx global>{`
         .kitchen-svg {

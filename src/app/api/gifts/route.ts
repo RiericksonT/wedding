@@ -92,9 +92,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { giftId, reservedBy, phone, additionalInfo } = body;
+    const { giftId, reservedBy, phone, additionalInfo, status } = body as {
+      giftId?: string;
+      reservedBy?: string;
+      phone?: string;
+      additionalInfo?: string;
+      status?: 'reserved' | 'purchased';
+    };
     
-    if (!giftId || !reservedBy || !phone) {
+    if (!giftId || !reservedBy) {
       return NextResponse.json(
         { error: 'Dados incompletos' },
         { status: 400 }
@@ -124,11 +130,15 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    const nextStatus: 'reserved' | 'purchased' = status === 'purchased' ? 'purchased' : 'reserved';
+
     // Atualizar dados
-    row.set('Status', 'reserved');
+    row.set('Status', nextStatus);
     row.set('ReservadoPor', reservedBy);
     row.set('DataReserva', new Date().toISOString());
-    row.set('Telefone', phone);
+    if (phone) {
+      row.set('Telefone', phone);
+    }
     
     if (additionalInfo) {
       // Se quiser salvar informações adicionais, adicione uma coluna na planilha
@@ -139,9 +149,10 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Presente reservado com sucesso',
+      message: `Presente marcado como ${nextStatus} com sucesso`,
       giftId,
       reservedBy,
+      status: nextStatus,
       reservedAt: new Date().toISOString()
     });
 

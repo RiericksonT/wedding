@@ -27,6 +27,8 @@ export default function Presentes() {
   const [phone, setPhone] = useState("");
   const [selectedComodo, setSelectedComodo] = useState("");
   const [selectedGifts, setSelectedGifts] = useState<SelectedGift[]>([]);
+  const [showPixConfirmationModal, setShowPixConfirmationModal] = useState(false);
+  const [isFinalizingPix, setIsFinalizingPix] = useState(false);
 
   useEffect(() => {
     const storedName = sessionStorage.getItem("name");
@@ -81,30 +83,40 @@ export default function Presentes() {
     );
   };
 
-  const handleReserveViaWhatsApp = async () => {
+  const reserveSelectedGifts = async ({
+    status,
+    requirePhone,
+    whatsappPrefix
+  }: {
+    status: "reserved" | "purchased";
+    requirePhone: boolean;
+    whatsappPrefix: string;
+  }) => {
     if (selectedGifts.length === 0) {
       alert("Selecione pelo menos uma opção para reservar!");
-      return;
+      return { success: false };
     }
 
-    let currentName = name;
-    let currentPhone = phone;
+    let currentName = name?.trim() || "Convidado";
+    let currentPhone = phone?.trim() || "";
 
-    if (!currentName) {
+    if (!name?.trim()) {
       const inputName = window.prompt("Digite seu nome para continuar:")?.trim();
-      if (!inputName) return;
+      if (!inputName) return { success: false };
       currentName = inputName;
       setName(inputName);
       sessionStorage.setItem("name", inputName);
     }
 
-    if (!currentPhone) {
+    if (requirePhone && !currentPhone) {
       const inputPhone = window.prompt("Digite seu telefone para continuar:")?.trim();
-      if (!inputPhone) return;
+      if (!inputPhone) return { success: false };
       currentPhone = inputPhone;
       setPhone(inputPhone);
       sessionStorage.setItem("phone", inputPhone);
     }
+
+    const phoneForApi = currentPhone || "nao-informado";
 
     const reservationResults = await Promise.all(
       selectedGifts.map(async (gift) => {
@@ -115,7 +127,8 @@ export default function Presentes() {
             body: JSON.stringify({
               giftId: gift.option.id,
               reservedBy: currentName,
-              phone: currentPhone,
+              phone: phoneForApi,
+              status,
               additionalInfo: `Reserva via site: ${gift.furnitureName} - ${gift.option.name}`
             }),
           });
@@ -132,7 +145,7 @@ export default function Presentes() {
     const successfulReservations = reservationResults.filter((result) => result.success).length;
     if (successfulReservations === 0) {
       alert("Não foi possível reservar nenhum dos itens selecionados. Eles podem já estar reservados.");
-      return;
+      return { success: false };
     }
 
     const successfulGifts = selectedGifts.filter((_, index) => reservationResults[index].success);
@@ -141,7 +154,11 @@ export default function Presentes() {
       .map((gift) => `• ${gift.furnitureName} - ${gift.option.name}\n  Valor: R$ ${gift.option.estimatedValue.toFixed(2).replace(".", ",")}`)
       .join("\n\n");
 
-    let whatsappMessage = `Olá! Gostaria de reservar os seguintes presentes:\n\n${itemsText}\n\n💰 Valor total estimado: R$ ${totalValue.toFixed(2).replace(".", ",")}\n\nMeu nome: ${currentName}\nMeu telefone: ${currentPhone}\n\nPor favor, confirmem a reserva!`;
+    let whatsappMessage = `${whatsappPrefix}\n\n${itemsText}\n\n💰 Valor total estimado: R$ ${totalValue.toFixed(2).replace(".", ",")}\n\nNome: ${currentName}`;
+    if (currentPhone) {
+      whatsappMessage += `\nTelefone: ${currentPhone}`;
+    }
+    whatsappMessage += "\n\nPor favor, confirmem.";
 
     if (successfulReservations < selectedGifts.length) {
       const failedGifts = selectedGifts.filter((_, index) => !reservationResults[index].success);
@@ -152,9 +169,18 @@ export default function Presentes() {
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`, "_blank");
 
     setSelectedGifts((prev) => prev.filter((_, index) => !reservationResults[index].success));
+    return { success: true };
   };
 
-  const handlePixAndReserve = () => {
+  const handleReserveViaWhatsApp = async () => {
+    await reserveSelectedGifts({
+      status: "reserved",
+      requirePhone: true,
+      whatsappPrefix: "Olá! Gostaria de reservar os seguintes presentes:"
+    });
+  };
+
+  const handlePixAndReserve = async () => {
     const pixUrl = process.env.NEXT_PUBLIC_PIX_URL;
 
     if (!pixUrl) {
@@ -162,14 +188,21 @@ export default function Presentes() {
       return;
     }
 
-    window.open(pixUrl, "_blank");
+    window.open(pixUrl, "_blank", "noopener,noreferrer");
+    setShowPixConfirmationModal(true);
+  };
 
-    const shouldContinue = window.confirm(
-      "Abrimos o Pix em outra aba. Depois de visualizar/pagar, clique em OK para continuar e enviar no WhatsApp."
-    );
-
-    if (!shouldContinue) return;
-    handleReserveViaWhatsApp();
+  const handleConfirmPixPayment = async () => {
+    setIsFinalizingPix(true);
+    const result = await reserveSelectedGifts({
+      status: "purchased",
+      requirePhone: false,
+      whatsappPrefix: "Olá! Pagamento via Pix realizado. Itens comprados:"
+    });
+    if (result.success) {
+      setShowPixConfirmationModal(false);
+    }
+    setIsFinalizingPix(false);
   };
 
   return (
@@ -272,6 +305,37 @@ export default function Presentes() {
         onPixAndReserve={handlePixAndReserve}
         userName={name}
       />
+
+      {showPixConfirmationModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-6">
+            <h3 className="text-2xl font-serif text-[#3e503c] mb-3">
+              Confirmar pagamento Pix
+            </h3>
+            <p className="text-[#3e503c] font-sans mb-6">
+              Depois de finalizar o Pix, clique em <span className="font-semibold">Já fiz o Pix</span>.
+              Vamos salvar na planilha e abrir o WhatsApp com a mensagem pronta.
+            </p>
+
+            <div className="flex flex-wrap gap-3 justify-end">
+              <button
+                onClick={() => setShowPixConfirmationModal(false)}
+                disabled={isFinalizingPix}
+                className="px-4 py-2 rounded-lg border border-[#3e503c] text-[#3e503c] hover:bg-[#f3efe9] transition-colors font-sans disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmPixPayment}
+                disabled={isFinalizingPix}
+                className="px-5 py-2 rounded-lg bg-[#3e503c] text-white hover:bg-[#2c3b2a] transition-colors font-sans disabled:opacity-60"
+              >
+                {isFinalizingPix ? "Salvando..." : "Já fiz o Pix"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -9,6 +9,7 @@ import KitchenSVG from "@/components/roooms/kitchen/kitchen";
 import BathroomSVG from "@/components/roooms/bathroom/bathroom";
 import SharedGiftList from "@/components/gifts/sharedGiftList";
 import { SelectedGift } from "@/types/selectedGiftInterface";
+import { GiftOption } from "@/types/giftOptionInterface";
 
 // Configuração das fontes
 const inter = Inter({ 
@@ -21,6 +22,33 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
 });
 
+const getDynamicQuotaValue = (gift: SelectedGift) =>
+  Number((gift.option.estimatedValue / (gift.option.quotasTotal || 10)).toFixed(2));
+
+const getGiftReservationValue = (gift: SelectedGift) => {
+  if (!gift.option.isQuotaEligible) return gift.option.estimatedValue;
+  if (gift.quotaSelectionType === "full") return gift.option.estimatedValue;
+
+  const quotaValue = gift.option.quotaValue || getDynamicQuotaValue(gift);
+  const quotas = gift.quotasSelected || 1;
+  return Number((quotaValue * quotas).toFixed(2));
+};
+
+const getGiftReservationLabel = (gift: SelectedGift) => {
+  if (!gift.option.isQuotaEligible) {
+    return `Valor: R$ ${gift.option.estimatedValue.toFixed(2).replace(".", ",")}`;
+  }
+
+  if (gift.quotaSelectionType === "full") {
+    return `Presente inteiro: R$ ${gift.option.estimatedValue.toFixed(2).replace(".", ",")}`;
+  }
+
+  const quotaValue = gift.option.quotaValue || getDynamicQuotaValue(gift);
+  const quotasTotal = gift.option.quotasTotal || 10;
+  const quotasSelected = gift.quotasSelected || 1;
+  return `${quotasSelected} cota(s) de R$ ${quotaValue.toFixed(2).replace(".", ",")} (${quotasTotal}x cotas)`;
+};
+
 export default function Presentes() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -29,6 +57,11 @@ export default function Presentes() {
   const [selectedGifts, setSelectedGifts] = useState<SelectedGift[]>([]);
   const [showPixConfirmationModal, setShowPixConfirmationModal] = useState(false);
   const [isFinalizingPix, setIsFinalizingPix] = useState(false);
+  const [showQuotaSelectionModal, setShowQuotaSelectionModal] = useState(false);
+  const [pendingQuotaGift, setPendingQuotaGift] = useState<SelectedGift | null>(null);
+  const [selectedQuotaCount, setSelectedQuotaCount] = useState(1);
+  const [otherGifts, setOtherGifts] = useState<GiftOption[]>([]);
+  const [loadingOtherGifts, setLoadingOtherGifts] = useState(false);
 
   useEffect(() => {
     const storedName = sessionStorage.getItem("name");
@@ -49,12 +82,43 @@ export default function Presentes() {
     sessionStorage.setItem("selectedGifts", JSON.stringify(selectedGifts));
   }, [selectedGifts]);
 
+  useEffect(() => {
+    if (selectedComodo !== "Outros") return;
+
+    const loadOtherGifts = async () => {
+      try {
+        setLoadingOtherGifts(true);
+        const response = await fetch("/api/gifts");
+        if (!response.ok) throw new Error("Erro ao carregar presentes de outros");
+
+        const allGifts: GiftOption[] = await response.json();
+        const normalized = allGifts
+          .filter((gift) => gift.category?.toLowerCase() === "outros")
+          .map((gift) => ({
+            ...gift,
+            id: gift.id || `outros-${gift.name.toLowerCase().replace(/\s+/g, "-")}`,
+            estimatedValue: gift.estimatedValue || 0,
+            image: gift.image || "",
+          }));
+
+        setOtherGifts(normalized);
+      } catch (error) {
+        console.error("Erro ao carregar categoria Outros:", error);
+        setOtherGifts([]);
+      } finally {
+        setLoadingOtherGifts(false);
+      }
+    };
+
+    loadOtherGifts();
+  }, [selectedComodo]);
+
   const comodos = [
     "Sala",
     "Cozinha",
     "Quarto Casal",
     "Banheiro",
-    "Varanda",
+    "Outros",
   ];
 
   const handleComodoClick = (comodo: string) => {
@@ -62,17 +126,62 @@ export default function Presentes() {
     sessionStorage.setItem("comodoSelecionado", comodo);
   };
 
-  const handleAddGift = (gift: SelectedGift) => {
+  const addOrUpdateSelectedGift = (nextGift: SelectedGift) => {
     setSelectedGifts((prev) => {
-      const alreadyExists = prev.some(
+      const existingIndex = prev.findIndex(
         (currentGift) =>
-          currentGift.furnitureId === gift.furnitureId &&
-          currentGift.option.id === gift.option.id
+          currentGift.furnitureId === nextGift.furnitureId &&
+          currentGift.option.id === nextGift.option.id
       );
 
-      if (alreadyExists) return prev;
-      return [...prev, gift];
+      if (existingIndex === -1) return [...prev, nextGift];
+
+      const updated = [...prev];
+      updated[existingIndex] = nextGift;
+      return updated;
     });
+  };
+
+  const closeQuotaSelectionModal = () => {
+    setShowQuotaSelectionModal(false);
+    setPendingQuotaGift(null);
+    setSelectedQuotaCount(1);
+  };
+
+  const handleAddGift = (gift: SelectedGift) => {
+    if (!gift.option.isQuotaEligible) {
+      addOrUpdateSelectedGift(gift);
+      return;
+    }
+
+    setPendingQuotaGift(gift);
+    setSelectedQuotaCount(1);
+    setShowQuotaSelectionModal(true);
+  };
+
+  const handleSelectFullGift = () => {
+    if (!pendingQuotaGift) return;
+    const quotasRemaining = Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 10);
+
+    addOrUpdateSelectedGift({
+      ...pendingQuotaGift,
+      quotaSelectionType: "full",
+      quotasSelected: quotasRemaining,
+    });
+    closeQuotaSelectionModal();
+  };
+
+  const handleSelectQuotasGift = () => {
+    if (!pendingQuotaGift) return;
+    const quotasRemaining = Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 10);
+    const quotasSelected = Math.min(Math.max(1, selectedQuotaCount), quotasRemaining);
+
+    addOrUpdateSelectedGift({
+      ...pendingQuotaGift,
+      quotaSelectionType: "quotas",
+      quotasSelected,
+    });
+    closeQuotaSelectionModal();
   };
 
   const handleRemoveGift = (furnitureId: string, giftId: string) => {
@@ -129,7 +238,11 @@ export default function Presentes() {
               reservedBy: currentName,
               phone: phoneForApi,
               status,
-              additionalInfo: `Reserva via site: ${gift.furnitureName} - ${gift.option.name}`
+              reserveWhole: gift.option.isQuotaEligible && gift.quotaSelectionType === "full",
+              quotasToReserve: gift.option.isQuotaEligible
+                ? (gift.quotaSelectionType === "full" ? undefined : (gift.quotasSelected || 1))
+                : undefined,
+              additionalInfo: `Reserva via site: ${gift.furnitureName} - ${gift.option.name} (${getGiftReservationLabel(gift)})`
             }),
           });
 
@@ -149,9 +262,9 @@ export default function Presentes() {
     }
 
     const successfulGifts = selectedGifts.filter((_, index) => reservationResults[index].success);
-    const totalValue = successfulGifts.reduce((total, gift) => total + gift.option.estimatedValue, 0);
+    const totalValue = successfulGifts.reduce((total, gift) => total + getGiftReservationValue(gift), 0);
     const itemsText = successfulGifts
-      .map((gift) => `• ${gift.furnitureName} - ${gift.option.name}\n  Valor: R$ ${gift.option.estimatedValue.toFixed(2).replace(".", ",")}`)
+      .map((gift) => `• ${gift.furnitureName} - ${gift.option.name}\n  ${getGiftReservationLabel(gift)}`)
       .join("\n\n");
 
     let whatsappMessage = `${whatsappPrefix}\n\n${itemsText}\n\n💰 Valor total estimado: R$ ${totalValue.toFixed(2).replace(".", ",")}\n\nNome: ${currentName}`;
@@ -204,6 +317,14 @@ export default function Presentes() {
     }
     setIsFinalizingPix(false);
   };
+
+  const pendingQuotasRemaining = pendingQuotaGift
+    ? Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 10)
+    : 1;
+
+  const pendingQuotaValue = pendingQuotaGift
+    ? (pendingQuotaGift.option.quotaValue || getDynamicQuotaValue(pendingQuotaGift))
+    : 0;
 
   return (
     <section className={`${inter.variable} ${playfair.variable} w-full min-h-screen flex flex-col items-center bg-[#f9f6f2] px-6 md:px-12 py-16 relative`}>
@@ -296,6 +417,89 @@ export default function Presentes() {
           />
         </div>
       )}
+      {selectedComodo === "Outros" && (
+        <div className="w-full max-w-6xl bg-white border-4 border-[#3e503c] rounded-lg p-6">
+          <h3 className="text-2xl font-serif italic text-[#3e503c] mb-2">
+            Outros
+          </h3>
+          <p className="text-[#3e503c] text-sm font-sans mb-6">
+            Presentes diferentes e divertidos, direto da planilha.
+          </p>
+
+          {loadingOtherGifts ? (
+            <p className="text-[#3e503c] font-sans">Carregando presentes...</p>
+          ) : otherGifts.length === 0 ? (
+            <p className="text-[#3e503c] font-sans">Nenhum presente encontrado na categoria "outros".</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {otherGifts.map((option) => {
+                const isReserved = option.status === "reserved" || option.status === "purchased";
+                const quotaValue = option.quotaValue || Number((option.estimatedValue / (option.quotasTotal || 10)).toFixed(2));
+                const quotasRemaining = option.quotasRemaining ?? option.quotasTotal ?? 10;
+
+                return (
+                  <div
+                    key={option.id}
+                    className={`border rounded-lg p-4 transition-colors ${
+                      isReserved
+                        ? "border-gray-300 bg-gray-50"
+                        : "border-[#d6d1c4] hover:border-[#3e503c]"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start gap-3 mb-2">
+                      <h4 className="text-lg font-semibold text-[#2c3b2a] font-sans">
+                        {option.name}
+                      </h4>
+                      {isReserved && (
+                        <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded font-sans">
+                          Reservado
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-[#3e503c] text-sm font-sans">
+                      {option.description}
+                    </p>
+
+                    {option.isQuotaEligible && (
+                      <p className="text-sm text-[#2c3b2a] mt-2 font-sans font-semibold bg-[#eef4ed] border border-[#c9d8c6] rounded px-2 py-1 inline-block">
+                        {isReserved
+                          ? "Cotas esgotadas"
+                          : `${quotasRemaining} cota(s) restantes • ${option.quotasTotal || 10}x de R$ ${quotaValue.toFixed(2).replace(".", ",")}`}
+                      </p>
+                    )}
+
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <span className="text-xl font-bold text-[#3e503c] font-sans">
+                        R$ {option.estimatedValue.toFixed(2).replace(".", ",")}
+                      </span>
+
+                      <button
+                        onClick={() =>
+                          !isReserved &&
+                          handleAddGift({
+                            furnitureId: "OutrosCategoria",
+                            furnitureName: "Outros",
+                            option,
+                          })
+                        }
+                        disabled={isReserved}
+                        className={`px-3 py-1 text-sm rounded transition-colors font-sans ${
+                          isReserved
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-[#3e503c] text-white hover:bg-[#2c3b2a]"
+                        }`}
+                      >
+                        {isReserved ? "Indisponível" : "Escolher este"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       <SharedGiftList
         selectedGifts={selectedGifts}
@@ -331,6 +535,69 @@ export default function Presentes() {
                 className="px-5 py-2 rounded-lg bg-[#3e503c] text-white hover:bg-[#2c3b2a] transition-colors font-sans disabled:opacity-60"
               >
                 {isFinalizingPix ? "Salvando..." : "Já fiz o Pix"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showQuotaSelectionModal && pendingQuotaGift && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-6">
+            <h3 className="text-2xl font-serif text-[#3e503c] mb-2">
+              Como você quer presentear?
+            </h3>
+            <p className="text-[#3e503c] font-sans mb-1">
+              <span className="font-semibold">{pendingQuotaGift.option.name}</span>
+            </p>
+            <p className="text-sm text-[#3e503c] font-sans mb-6">
+              <span className="text-base font-semibold text-[#2c3b2a] bg-[#eef4ed] border border-[#c9d8c6] rounded px-2 py-1 inline-block">
+                {pendingQuotasRemaining} cotas disponíveis • R$ {pendingQuotaValue.toFixed(2).replace(".", ",")} por cota
+              </span>
+            </p>
+
+            <div className="space-y-4">
+              <button
+                onClick={handleSelectFullGift}
+                className="w-full px-4 py-3 rounded-lg bg-[#3e503c] text-white hover:bg-[#2c3b2a] transition-colors font-sans font-semibold"
+              >
+                Presentear tudo
+              </button>
+
+              <div className="border border-[#d6d1c4] rounded-lg p-4">
+                <label className="block text-sm text-[#3e503c] font-sans mb-2">
+                  Escolher quantidade de cotas
+                </label>
+                <select
+                  value={selectedQuotaCount}
+                  onChange={(e) => setSelectedQuotaCount(parseInt(e.target.value, 10))}
+                  className="w-full px-3 py-2 rounded-lg border border-[#d6d1c4] text-[#3e503c] font-sans"
+                >
+                  {Array.from({ length: pendingQuotasRemaining }, (_, index) => {
+                    const count = index + 1;
+                    const total = Number((pendingQuotaValue * count).toFixed(2));
+                    return (
+                      <option key={count} value={count}>
+                        {count}x cota - R$ {total.toFixed(2).replace(".", ",")}
+                      </option>
+                    );
+                  })}
+                </select>
+                <button
+                  onClick={handleSelectQuotasGift}
+                  className="w-full mt-3 px-4 py-2 rounded-lg border border-[#3e503c] text-[#3e503c] hover:bg-[#f3efe9] transition-colors font-sans font-semibold"
+                >
+                  Adicionar cotas
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={closeQuotaSelectionModal}
+                className="px-4 py-2 rounded-lg text-[#3e503c] hover:bg-[#f3efe9] transition-colors font-sans"
+              >
+                Cancelar
               </button>
             </div>
           </div>

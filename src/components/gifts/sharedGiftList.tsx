@@ -31,7 +31,15 @@ export default function SharedGiftList({
     );
   }
 
-  const totalValue = selectedGifts.reduce((total, gift) => total + gift.option.estimatedValue, 0);
+  const getReservationValue = (gift: SelectedGift) => {
+    if (!gift.option.isQuotaEligible) return gift.option.estimatedValue;
+    if (gift.quotaSelectionType === "full") return gift.option.estimatedValue;
+
+    const quotaValue = gift.option.quotaValue || Number((gift.option.estimatedValue / (gift.option.quotasTotal || 10)).toFixed(2));
+    return Number((quotaValue * (gift.quotasSelected || 1)).toFixed(2));
+  };
+
+  const totalValue = selectedGifts.reduce((total, gift) => total + getReservationValue(gift), 0);
 
   return (
     <div className="mt-8 w-full max-w-5xl bg-[#f9f6f2] border-2 border-[#3e503c] rounded-lg p-6">
@@ -75,10 +83,21 @@ export default function SharedGiftList({
               <p className="text-sm text-[#3e503c] italic font-sans">
                 {gift.option.description}
               </p>
+              {gift.option.isQuotaEligible && (
+                <p className="text-xs text-[#3e503c] mt-1 font-sans">
+                  {gift.option.quotasRemaining !== undefined
+                    ? `${gift.option.quotasRemaining} cotas restantes`
+                    : "Presente por cotas"}
+                </p>
+              )}
 
               <div className="flex items-center gap-4 mt-3">
                 <span className="font-semibold text-[#3e503c] font-sans">
-                  R$ {gift.option.estimatedValue.toFixed(2).replace(".", ",")}
+                  {gift.option.isQuotaEligible
+                    ? gift.quotaSelectionType === "full"
+                      ? `Presente inteiro: R$ ${gift.option.estimatedValue.toFixed(2).replace(".", ",")}`
+                      : `${gift.quotasSelected || 1} cota(s): R$ ${getReservationValue(gift).toFixed(2).replace(".", ",")}`
+                    : `R$ ${gift.option.estimatedValue.toFixed(2).replace(".", ",")}`}
                 </span>
 
                 {gift.option.storeLink && (

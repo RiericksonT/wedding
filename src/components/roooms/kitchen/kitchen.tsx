@@ -366,6 +366,8 @@ export default function KitchenSVG({
               <div className="space-y-4">
                 {currentFurniture.options.map((option) => {
                   const isReserved = option.status === 'reserved' || option.status === 'purchased';
+                  const quotaValue = option.quotaValue || Number((option.estimatedValue / (option.quotasTotal || 10)).toFixed(2));
+                  const quotasRemaining = option.quotasRemaining ?? option.quotasTotal ?? 10;
                   
                   return (
                     <div
@@ -408,6 +410,13 @@ export default function KitchenSVG({
                           <p className="text-[#3e503c] text-sm mt-2 font-sans">
                             {option.description}
                           </p>
+                          {option.isQuotaEligible && (
+                            <p className="text-sm text-[#2c3b2a] mt-2 font-sans font-semibold bg-[#eef4ed] border border-[#c9d8c6] rounded px-2 py-1 inline-block">
+                              {isReserved
+                                ? "Cotas esgotadas"
+                                : `${quotasRemaining} cota(s) restantes • ${option.quotasTotal || 10}x de R$ ${quotaValue.toFixed(2).replace('.', ',')}`}
+                            </p>
+                          )}
                           
                           <div className="flex items-center justify-between mt-4">
                             <span className="text-xl font-bold text-[#3e503c] font-sans">

@@ -6,5 +6,10 @@ export interface GiftOption {
   image: string;
   storeLink?: string;
   category?: string; 
-  status?: 'available' | 'reserved' | 'purchased'; 
+  status?: 'available' | 'partial' | 'reserved' | 'purchased';
+  isQuotaEligible?: boolean;
+  quotaValue?: number;
+  quotasTotal?: number;
+  quotasReserved?: number;
+  quotasRemaining?: number;
 }

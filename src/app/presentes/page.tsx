@@ -23,7 +23,7 @@ const playfair = Playfair_Display({
 });
 
 const getDynamicQuotaValue = (gift: SelectedGift) =>
-  Number((gift.option.estimatedValue / (gift.option.quotasTotal || 10)).toFixed(2));
+  Number((gift.option.estimatedValue / (gift.option.quotasTotal || 6)).toFixed(2));
 
 const getGiftReservationValue = (gift: SelectedGift) => {
   if (!gift.option.isQuotaEligible) return gift.option.estimatedValue;
@@ -44,7 +44,7 @@ const getGiftReservationLabel = (gift: SelectedGift) => {
   }
 
   const quotaValue = gift.option.quotaValue || getDynamicQuotaValue(gift);
-  const quotasTotal = gift.option.quotasTotal || 10;
+  const quotasTotal = gift.option.quotasTotal || 6;
   const quotasSelected = gift.quotasSelected || 1;
   return `${quotasSelected} cota(s) de R$ ${quotaValue.toFixed(2).replace(".", ",")} (${quotasTotal}x cotas)`;
 };
@@ -161,7 +161,7 @@ export default function Presentes() {
 
   const handleSelectFullGift = () => {
     if (!pendingQuotaGift) return;
-    const quotasRemaining = Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 10);
+    const quotasRemaining = Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 6);
 
     addOrUpdateSelectedGift({
       ...pendingQuotaGift,
@@ -173,7 +173,7 @@ export default function Presentes() {
 
   const handleSelectQuotasGift = () => {
     if (!pendingQuotaGift) return;
-    const quotasRemaining = Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 10);
+    const quotasRemaining = Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 6);
     const quotasSelected = Math.min(Math.max(1, selectedQuotaCount), quotasRemaining);
 
     addOrUpdateSelectedGift({
@@ -271,11 +271,11 @@ export default function Presentes() {
     if (currentPhone) {
       whatsappMessage += `\nTelefone: ${currentPhone}`;
     }
-    whatsappMessage += "\n\nPor favor, confirmem.";
+    whatsappMessage += `\n\nPor favor, confirmem o recebimento. Obrigado(a) e que o casamento de vocês seja lindo! 💍`;
 
     if (successfulReservations < selectedGifts.length) {
       const failedGifts = selectedGifts.filter((_, index) => !reservationResults[index].success);
-      whatsappMessage += `\n\n⚠️ Atenção: Os seguintes itens podem já estar reservados:\n${failedGifts.map((gift) => `• ${gift.option.name}`).join("\n")}`;
+      whatsappMessage += `\n\n⚠️ Obs: Os seguintes itens podem já ter sido reservados por outra pessoa:\n${failedGifts.map((gift) => `• ${gift.option.name}`).join("\n")}`;
     }
 
     const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5511999999999";
@@ -289,7 +289,7 @@ export default function Presentes() {
     await reserveSelectedGifts({
       status: "reserved",
       requirePhone: true,
-      whatsappPrefix: "Olá! Gostaria de reservar os seguintes presentes:"
+      whatsappPrefix: "Oi, Gabriela e Kaique! 💚\n\nFiquei muito feliz em poder participar desse momento especial de vocês! Gostaria de reservar o(s) seguinte(s) presente(s) da lista de casamento:"
     });
   };
 
@@ -310,7 +310,7 @@ export default function Presentes() {
     const result = await reserveSelectedGifts({
       status: "purchased",
       requirePhone: false,
-      whatsappPrefix: "Olá! Pagamento via Pix realizado. Itens comprados:"
+      whatsappPrefix: "Oi, Gabriela e Kaique! 🎊\n\nAcabei de fazer o pagamento via Pix! Presente(s) enviado(s) com muito carinho:"
     });
     if (result.success) {
       setShowPixConfirmationModal(false);
@@ -319,7 +319,7 @@ export default function Presentes() {
   };
 
   const pendingQuotasRemaining = pendingQuotaGift
-    ? Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 10)
+    ? Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 6)
     : 1;
 
   const pendingQuotaValue = pendingQuotaGift
@@ -434,8 +434,8 @@ export default function Presentes() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {otherGifts.map((option) => {
                 const isReserved = option.status === "reserved" || option.status === "purchased";
-                const quotaValue = option.quotaValue || Number((option.estimatedValue / (option.quotasTotal || 10)).toFixed(2));
-                const quotasRemaining = option.quotasRemaining ?? option.quotasTotal ?? 10;
+                const quotaValue = option.quotaValue || Number((option.estimatedValue / (option.quotasTotal || 6)).toFixed(2));
+                const quotasRemaining = option.quotasRemaining ?? option.quotasTotal ?? 6;
 
                 return (
                   <div
@@ -465,7 +465,7 @@ export default function Presentes() {
                       <p className="text-sm text-[#2c3b2a] mt-2 font-sans font-semibold bg-[#eef4ed] border border-[#c9d8c6] rounded px-2 py-1 inline-block">
                         {isReserved
                           ? "Cotas esgotadas"
-                          : `${quotasRemaining} cota(s) restantes • ${option.quotasTotal || 10}x de R$ ${quotaValue.toFixed(2).replace(".", ",")}`}
+                          : `${quotasRemaining} cota(s) restantes • ${option.quotasTotal || 6}x de R$ ${quotaValue.toFixed(2).replace(".", ",")}`}
                       </p>
                     )}
 

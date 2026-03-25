@@ -35,7 +35,7 @@ export default function SharedGiftList({
     if (!gift.option.isQuotaEligible) return gift.option.estimatedValue;
     if (gift.quotaSelectionType === "full") return gift.option.estimatedValue;
 
-    const quotaValue = gift.option.quotaValue || Number((gift.option.estimatedValue / (gift.option.quotasTotal || 10)).toFixed(2));
+    const quotaValue = gift.option.quotaValue || Number((gift.option.estimatedValue / (gift.option.quotasTotal || 6)).toFixed(2));
     return Number((quotaValue * (gift.quotasSelected || 1)).toFixed(2));
   };
 

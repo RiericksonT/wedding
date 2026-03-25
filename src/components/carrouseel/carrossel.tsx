@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import Presentes from '../../app/presentes/page';
 
 const images = [
   "https://github.com/user-attachments/assets/41189c99-7998-451c-81fb-128ec9336eb7",
@@ -69,9 +68,14 @@ export default function ImageCarousel() {
         </div>
       </div>
       <div>
-        <button onClick={() => window.location.href = '/lista-casamento'} className="mt-14 px-8 py-6 bg-[#3e503c] text-white rounded-lg hover:bg-[#2c3a26] text-2xl md:text-3xl italic">
-          Lista de Presentes
-        </button>
+        <div className="mt-14 flex flex-col md:flex-row gap-4 justify-center">
+          <button onClick={() => window.location.href = '/lista-casamento'} className="px-8 py-6 bg-[#3e503c] text-white rounded-lg hover:bg-[#2c3a26] text-2xl md:text-3xl italic">
+            Lista de Presentes
+          </button>
+          <button onClick={() => window.location.href = '/rsvp'} className="px-8 py-6 bg-white border-2 border-[#3e503c] text-[#3e503c] rounded-lg hover:bg-[#eef4ed] text-2xl md:text-3xl italic">
+            Confirmar Presença
+          </button>
+        </div>
       </div>
     </section>
   );

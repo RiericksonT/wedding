@@ -4,7 +4,7 @@ import { JWT } from 'google-auth-library';
 import { GiftOption } from '@/types/giftOptionInterface';
 
 const QUOTA_THRESHOLD = 1100;
-const DEFAULT_QUOTAS_TOTAL = 10;
+const DEFAULT_QUOTAS_TOTAL = 6;
 
 function parseNumber(value: unknown, fallback = 0): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value;

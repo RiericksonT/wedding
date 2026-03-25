@@ -49,6 +49,9 @@ export default function HomeSession() {
             <li>
               <Link href="/lista-casamento">Lista de Presentes</Link>
             </li>
+            <li>
+              <Link href="/rsvp">RSVP</Link>
+            </li>
           </ul>
         </nav>
       </header>

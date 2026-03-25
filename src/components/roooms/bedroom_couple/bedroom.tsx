@@ -256,14 +256,12 @@ export default function QuartoSVG({
       
       const totalValue = successfulGifts.reduce((total, gift) => total + gift.option.estimatedValue, 0);
       
-      let whatsappMessage = `Olá! Gostaria de reservar os seguintes presentes:\n\n${itemsText}\n\n💰 Valor total estimado: R$ ${totalValue.toFixed(2).replace('.', ',')}\n\nMeu nome: ${userName}\nMeu telefone: ${userPhone}`;
+      let whatsappMessage = `Oi, Gabriela e Kaique! 💚\n\nFiquei muito feliz em poder participar desse momento especial de vocês! Gostaria de reservar o(s) seguinte(s) presente(s) da lista de casamento:\n\n${itemsText}\n\n💰 Valor total estimado: R$ ${totalValue.toFixed(2).replace('.', ',')}\n\n👤 Nome: ${userName}\n📱 Telefone: ${userPhone}\n\nPor favor, confirmem a reserva para mim. Obrigado(a) e que o casamento de vocês seja lindo! 🎊`;
       
       if (successfulReservations < selectedGifts.length) {
         const failedGifts = selectedGifts.filter((_, index) => !reservationResults[index].success);
-        whatsappMessage += `\n\n⚠️ Atenção: Os seguintes itens podem já estar reservados:\n${failedGifts.map(g => `• ${g.option.name}`).join('\n')}`;
+        whatsappMessage += `\n\n⚠️ Obs: Os seguintes itens podem já ter sido reservados por outra pessoa:\n${failedGifts.map(g => `• ${g.option.name}`).join('\n')}`;
       }
-      
-      whatsappMessage += `\n\nPor favor, confirmem a reserva!`;
       
       const encodedMessage = encodeURIComponent(whatsappMessage);
       
@@ -391,8 +389,8 @@ export default function QuartoSVG({
               <div className="space-y-4">
                 {currentFurniture.options.map((option) => {
                   const isReserved = option.status === 'reserved' || option.status === 'purchased';
-                  const quotaValue = option.quotaValue || Number((option.estimatedValue / (option.quotasTotal || 10)).toFixed(2));
-                  const quotasRemaining = option.quotasRemaining ?? option.quotasTotal ?? 10;
+                  const quotaValue = option.quotaValue || Number((option.estimatedValue / (option.quotasTotal || 6)).toFixed(2));
+                  const quotasRemaining = option.quotasRemaining ?? option.quotasTotal ?? 6;
                   
                   return (
                     <div
@@ -444,7 +442,7 @@ export default function QuartoSVG({
                             <p className="text-sm text-[#2c3b2a] mt-2 font-sans font-semibold bg-[#eef4ed] border border-[#c9d8c6] rounded px-2 py-1 inline-block">
                               {isReserved
                                 ? "Cotas esgotadas"
-                                : `${quotasRemaining} cota(s) restantes • ${option.quotasTotal || 10}x de R$ ${quotaValue.toFixed(2).replace('.', ',')}`}
+                                : `${quotasRemaining} cota(s) restantes • ${option.quotasTotal || 6}x de R$ ${quotaValue.toFixed(2).replace('.', ',')}`}
                             </p>
                           )}
                           

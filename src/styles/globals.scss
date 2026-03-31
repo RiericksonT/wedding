@@ -1,9 +1,24 @@
 @import "tailwindcss";
 @import "variables";
-@import url('https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fleur+De+Leah&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Rouge+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap');
+
+.font-raleway {
+  font-family: 'Raleway', sans-serif;
+}
 
 
 body {
   font-family: 'Rouge Script', cursive, sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Fleur De Leah', cursive;
+}
+
+button {
+  font-family: 'Rouge Script', cursive;
+  cursor: pointer;
 }

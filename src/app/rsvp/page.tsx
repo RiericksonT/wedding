@@ -114,7 +114,7 @@ export default function RSVPPage() {
           ← Voltar
         </button>
 
-        <h1 className="text-4xl text-[#3e503c] mb-3 font-semibold">RSVP</h1>
+        <h1 className="text-4xl text-[#3e503c] mb-3 font-semibold">Confirmar presença</h1>
         <p className="text-[#3e503c] mb-6">
           Confirme sua presença no casamento.
         </p>

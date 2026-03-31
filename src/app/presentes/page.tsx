@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Inter, Playfair_Display } from 'next/font/google';
 import QuartoSVG from "@/components/roooms/bedroom_couple/bedroom";
 import LivingRoomSVG from "@/components/roooms/livingroom/livingroom";
 import KitchenSVG from "@/components/roooms/kitchen/kitchen";
@@ -10,17 +9,6 @@ import BathroomSVG from "@/components/roooms/bathroom/bathroom";
 import SharedGiftList from "@/components/gifts/sharedGiftList";
 import { SelectedGift } from "@/types/selectedGiftInterface";
 import { GiftOption } from "@/types/giftOptionInterface";
-
-// Configuração das fontes
-const inter = Inter({ 
-  subsets: ['latin'],
-  variable: '--font-inter',
-});
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-});
 
 const getDynamicQuotaValue = (gift: SelectedGift) =>
   Number((gift.option.estimatedValue / (gift.option.quotasTotal || 6)).toFixed(2));
@@ -327,7 +315,10 @@ export default function Presentes() {
     : 0;
 
   return (
-    <section className={`${inter.variable} ${playfair.variable} w-full min-h-screen flex flex-col items-center bg-[#f9f6f2] px-6 md:px-12 py-16 relative`}>
+    <section
+      className="w-full min-h-screen flex flex-col items-center bg-[#f9f6f2] px-6 md:px-12 py-16 relative"
+      style={{ fontFamily: '"Segoe UI", "Helvetica Neue", Arial, sans-serif' }}
+    >
       {/* Voltar */}
       <button
         onClick={() => router.back()}
@@ -447,7 +438,7 @@ export default function Presentes() {
                     }`}
                   >
                     <div className="flex justify-between items-start gap-3 mb-2">
-                      <h4 className="text-lg font-semibold text-[#2c3b2a] font-sans">
+                      <h4 className="text-lg font-semibold text-[#2c3b2a]" style={{ fontFamily: "Raleway, sans-serif" }}>
                         {option.name}
                       </h4>
                       {isReserved && (

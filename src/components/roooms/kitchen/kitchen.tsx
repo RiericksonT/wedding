@@ -395,7 +395,7 @@ export default function KitchenSVG({
                         
                         <div className="md:w-2/3">
                           <div className="flex justify-between items-start">
-                            <h4 className="text-lg font-semibold text-[#2c3b2a] font-sans">
+                            <h4 className="text-lg font-semibold text-[#2c3b2a]" style={{ fontFamily: "Raleway, sans-serif" }}>
                               {option.name}
                             </h4>
                             {isReserved && (

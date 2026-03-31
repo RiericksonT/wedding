@@ -1,31 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.scss";
-import { Lavishly_Yours } from "next/font/google";
-import { Rouge_Script } from "next/font/google";
 import { ToastContainer } from "react-toastify";
-
-const lavishlyYours = Lavishly_Yours({
-  subsets: ["latin"],
-  weight: "400",
-  style: "normal",
-});
-
-const rougeScript = Rouge_Script({
-  subsets: ["latin"],
-  weight: "400",
-  style: "normal",
-});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Gabriela & Kaique",
@@ -38,9 +13,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={rougeScript.className}>
+    <html lang="pt-BR">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className="antialiased"
+        style={{
+          fontFamily:
+            '"Segoe UI", "Helvetica Neue", Arial, sans-serif',
+        }}
       >
         {children}
         <ToastContainer 

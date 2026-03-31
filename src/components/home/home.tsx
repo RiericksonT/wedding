@@ -50,7 +50,7 @@ export default function HomeSession() {
               <Link href="/lista-casamento">Lista de Presentes</Link>
             </li>
             <li>
-              <Link href="/rsvp">RSVP</Link>
+              <Link href="/rsvp">Confirmar presença</Link>
             </li>
           </ul>
         </nav>

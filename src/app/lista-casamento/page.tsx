@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import Presentes from '../presentes/page';
 
 export default function Welcome() {
     const router = useRouter();
@@ -28,7 +29,7 @@ export default function Welcome() {
       </button>
       {/* Título */}
       <h2 className="text-4xl md:text-6xl lg:text-7xl italic text-[#3e503c] mb-10 text-center">
-        Bem-vindo ao Nosso Casamento
+        Bem-vindo a nossa lista de presentes!
       </h2>
 
       {/* Texto explicativo */}
@@ -47,7 +48,7 @@ export default function Welcome() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3e503c] text-2xl"
+          className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3e503c] text-base font-sans"
         />
         <input
           type="email"
@@ -55,7 +56,7 @@ export default function Welcome() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3e503c] text-2xl"
+          className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3e503c] text-base font-sans"
         />
         <button
           type="submit"

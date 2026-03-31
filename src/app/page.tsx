@@ -10,7 +10,9 @@ export default function Home() {
       <HomeSession />
       <OurHistory />
       <Where />
-      <Notice youtubeVideoId="dQw4w9WgXcQ" />
+      <Notice
+        youtubeVideoIds={["qPVqh9mEN-c", "dQw4w9WgXcQ", "3JZ_D3ELwOQ"]}
+      />
       <ImageCarousel />
     </>
   );

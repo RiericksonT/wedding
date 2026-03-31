@@ -69,7 +69,7 @@
 
     background: linear-gradient(to bottom, $background-color 90%, transparent 100%);
     color: $olive-green;
-    font-family: 'Lavishly Yours', cursive, sans-serif;
+    font-family: 'Rouge Script', cursive, sans-serif;
     border-radius: 0.2rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
@@ -126,7 +126,7 @@
   padding: 0; // remove padding para hero full screen
   background-color: $background-color;
   color: $olive-green;
-  font-family: 'Lavishly Yours', cursive, sans-serif;
+  font-family: 'Fleur De Leah', cursive;
 
   .hero {
     position: relative;
@@ -201,6 +201,8 @@
         .heroTitle {
             margin: 0;
             font-size: 5.5rem;
+            font-family: 'Great Vibes', cursive;
+            font-weight: 400;
         }
     
         .heroSubtitle {

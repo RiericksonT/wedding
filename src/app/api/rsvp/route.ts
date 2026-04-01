@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
     }
 
     row.set("Vai", true);
+    row.set("Acompanhantes que vao", normalizedCompanions);
 
     await row.save();
 

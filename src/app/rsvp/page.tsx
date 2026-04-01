@@ -147,7 +147,7 @@ export default function RSVPPage() {
                       setSelectedGuestName(guest.name);
                       setCompanions((prev) => Math.min(prev, guest.maxCompanions));
                     }}
-                    className={`w-full text-left px-3 py-2 text-sm border-b border-[#eee] last:border-b-0 ${
+                    className={`w-full text-left px-3 py-2 text-base font-raleway tracking-normal border-b border-[#eee] last:border-b-0 ${
                       selectedGuestName === guest.name
                         ? "bg-[#eef4ed] text-[#2c3b2a] font-semibold"
                         : "hover:bg-[#f7f7f7] text-[#3e503c]"

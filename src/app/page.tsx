@@ -11,7 +11,7 @@ export default function Home() {
       <OurHistory />
       <Where />
       <Notice
-        youtubeVideoIds={["qPVqh9mEN-c", "dQw4w9WgXcQ", "3JZ_D3ELwOQ"]}
+        youtubeVideoIds={["qPVqh9mEN-c", "QWEltAut_MQ", "bbu6FjjxIYY"]}
       />
       <ImageCarousel />
     </>

@@ -6,7 +6,7 @@ interface NoticeProps {
   youtubeVideoIds?: string[];
 }
 
-const defaultVideoIds = ["qPVqh9mEN-c", "dQw4w9WgXcQ", "3JZ_D3ELwOQ"];
+const defaultVideoIds = ["qPVqh9mEN-c", "QWEltAut_MQ", "bbu6FjjxIYY"];
 
 export default function Notice({
   youtubeVideoIds = defaultVideoIds,

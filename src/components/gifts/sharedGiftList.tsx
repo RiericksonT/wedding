@@ -8,6 +8,7 @@ interface SharedGiftListProps {
   onClear: () => void;
   onReserve: () => void;
   onPixAndReserve?: () => void;
+  onMercadoPago?: () => void;
   userName?: string;
 }
 
@@ -17,6 +18,7 @@ export default function SharedGiftList({
   onClear,
   onReserve,
   onPixAndReserve,
+  onMercadoPago,
   userName
 }: SharedGiftListProps) {
   if (selectedGifts.length === 0) {
@@ -135,13 +137,22 @@ export default function SharedGiftList({
           </div>
 
           <div className="flex flex-wrap gap-3">
+            {onMercadoPago && (
+              <button
+                onClick={onMercadoPago}
+                className="px-6 py-3 bg-[#009ee3] text-white rounded-lg hover:bg-[#007eb5] transition-colors text-lg font-semibold font-sans flex items-center gap-2"
+              >
+                <span>💳</span>
+                Pagar com Mercado Pago
+              </button>
+            )}
             {onPixAndReserve && (
               <button
                 onClick={onPixAndReserve}
                 className="px-6 py-3 bg-[#3e503c] text-white rounded-lg hover:bg-[#2c3b2a] transition-colors text-lg font-semibold font-sans flex items-center gap-2"
               >
-                <span>💳</span>
-                Ver Pix e Continuar
+                <span>🏦</span>
+                Pagar com Pix
               </button>
             )}
             <button

@@ -306,6 +306,58 @@ export default function Presentes() {
     setIsFinalizingPix(false);
   };
 
+  const handleMercadoPago = async () => {
+    if (selectedGifts.length === 0) {
+      alert("Selecione pelo menos um presente antes de pagar!");
+      return;
+    }
+
+    let currentName = name?.trim() || "";
+    if (!currentName) {
+      const inputName = window.prompt("Digite seu nome para continuar:")?.trim();
+      if (!inputName) return;
+      currentName = inputName;
+      setName(inputName);
+      sessionStorage.setItem("name", inputName);
+    }
+
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gifts: selectedGifts.map((g) => ({
+            id: g.option.id,
+            name: g.option.name,
+            furnitureName: g.furnitureName,
+            description: g.option.description,
+            estimatedValue: g.option.estimatedValue,
+            isQuotaEligible: g.option.isQuotaEligible,
+            quotaSelectionType: g.quotaSelectionType,
+            quotasSelected: g.quotasSelected,
+            quotaValue: g.option.quotaValue,
+            quotasTotal: g.option.quotasTotal,
+          })),
+          name: currentName,
+          phone: phone || "",
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        alert(err.error || "Erro ao iniciar pagamento. Tente novamente.");
+        return;
+      }
+
+      const { url } = await response.json();
+      if (url) {
+        window.location.href = url;
+      }
+    } catch {
+      alert("Erro ao conectar ao Mercado Pago. Tente novamente.");
+    }
+  };
+
   const pendingQuotasRemaining = pendingQuotaGift
     ? Math.max(1, pendingQuotaGift.option.quotasRemaining || pendingQuotaGift.option.quotasTotal || 6)
     : 1;
@@ -498,6 +550,7 @@ export default function Presentes() {
         onClear={() => setSelectedGifts([])}
         onReserve={handleReserveViaWhatsApp}
         onPixAndReserve={handlePixAndReserve}
+        onMercadoPago={handleMercadoPago}
         userName={name}
       />
 

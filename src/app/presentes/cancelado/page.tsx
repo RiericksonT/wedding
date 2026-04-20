@@ -16,7 +16,7 @@ export default function Cancelado() {
           Pagamento cancelado
         </h1>
         <p className="text-[#3e503c] font-sans mb-6">
-          Tudo bem! Nenhum valor foi cobrado. Você ainda pode reservar os presentes por Pix ou avisar pelo WhatsApp. 💚
+          Tudo bem! Nenhum valor foi cobrado. Você pode tentar novamente ou reservar pelo WhatsApp. 💚
         </p>
         <button
           onClick={() => router.push("/presentes")}

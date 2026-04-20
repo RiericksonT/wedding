@@ -43,8 +43,6 @@ export default function Presentes() {
   const [phone, setPhone] = useState("");
   const [selectedComodo, setSelectedComodo] = useState("");
   const [selectedGifts, setSelectedGifts] = useState<SelectedGift[]>([]);
-  const [showPixConfirmationModal, setShowPixConfirmationModal] = useState(false);
-  const [isFinalizingPix, setIsFinalizingPix] = useState(false);
   const [showQuotaSelectionModal, setShowQuotaSelectionModal] = useState(false);
   const [pendingQuotaGift, setPendingQuotaGift] = useState<SelectedGift | null>(null);
   const [selectedQuotaCount, setSelectedQuotaCount] = useState(1);
@@ -279,31 +277,6 @@ export default function Presentes() {
       requirePhone: true,
       whatsappPrefix: "Oi, Gabriela e Kaique! 💚\n\nFiquei muito feliz em poder participar desse momento especial de vocês! Gostaria de reservar o(s) seguinte(s) presente(s) da lista de casamento:"
     });
-  };
-
-  const handlePixAndReserve = async () => {
-    const pixUrl = process.env.NEXT_PUBLIC_PIX_URL;
-
-    if (!pixUrl) {
-      alert("Link do Pix não configurado. Defina NEXT_PUBLIC_PIX_URL no ambiente.");
-      return;
-    }
-
-    window.open(pixUrl, "_blank", "noopener,noreferrer");
-    setShowPixConfirmationModal(true);
-  };
-
-  const handleConfirmPixPayment = async () => {
-    setIsFinalizingPix(true);
-    const result = await reserveSelectedGifts({
-      status: "purchased",
-      requirePhone: false,
-      whatsappPrefix: "Oi, Gabriela e Kaique! 🎊\n\nAcabei de fazer o pagamento via Pix! Presente(s) enviado(s) com muito carinho:"
-    });
-    if (result.success) {
-      setShowPixConfirmationModal(false);
-    }
-    setIsFinalizingPix(false);
   };
 
   const handleMercadoPago = async () => {
@@ -549,41 +522,9 @@ export default function Presentes() {
         onRemove={handleRemoveGift}
         onClear={() => setSelectedGifts([])}
         onReserve={handleReserveViaWhatsApp}
-        onPixAndReserve={handlePixAndReserve}
         onMercadoPago={handleMercadoPago}
         userName={name}
       />
-
-      {showPixConfirmationModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-6">
-            <h3 className="text-2xl font-serif text-[#3e503c] mb-3">
-              Confirmar pagamento Pix
-            </h3>
-            <p className="text-[#3e503c] font-sans mb-6">
-              Depois de finalizar o Pix, clique em <span className="font-semibold">Já fiz o Pix</span>.
-              Vamos salvar na planilha e abrir o WhatsApp com a mensagem pronta.
-            </p>
-
-            <div className="flex flex-wrap gap-3 justify-end">
-              <button
-                onClick={() => setShowPixConfirmationModal(false)}
-                disabled={isFinalizingPix}
-                className="px-4 py-2 rounded-lg border border-[#3e503c] text-[#3e503c] hover:bg-[#f3efe9] transition-colors font-sans disabled:opacity-60"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleConfirmPixPayment}
-                disabled={isFinalizingPix}
-                className="px-5 py-2 rounded-lg bg-[#3e503c] text-white hover:bg-[#2c3b2a] transition-colors font-sans disabled:opacity-60"
-              >
-                {isFinalizingPix ? "Salvando..." : "Já fiz o Pix"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showQuotaSelectionModal && pendingQuotaGift && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">

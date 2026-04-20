@@ -26,7 +26,7 @@ function SucessoContent() {
   const externalReference = searchParams.get("external_reference");
   const paymentId = searchParams.get("payment_id") || searchParams.get("collection_id");
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "pending" | "error">("loading");
   const [result, setResult] = useState<ConfirmResult | null>(null);
   const confirmedRef = useRef(false);
 
@@ -34,7 +34,7 @@ function SucessoContent() {
     if (confirmedRef.current) return;
     confirmedRef.current = true;
 
-    if (mpStatus !== "approved" || !externalReference) {
+    if (!externalReference || (mpStatus !== "approved" && mpStatus !== "pending")) {
       setStatus("error");
       setResult({ success: false, error: "Pagamento não aprovado ou dados ausentes." });
       return;
@@ -51,8 +51,7 @@ function SucessoContent() {
       .then((data: ConfirmResult) => {
         if (data.success) {
           setResult(data);
-          setStatus("success");
-          // Limpa presentes do sessionStorage após sucesso
+          setStatus(mpStatus === "pending" ? "pending" : "success");
           sessionStorage.removeItem("selectedGifts");
         } else {
           setResult(data);
@@ -125,6 +124,53 @@ function SucessoContent() {
 
           <p className="text-sm text-[#3e503c] font-sans mb-6">
             Que tal avisar os noivos pelo WhatsApp? 😊
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleOpenWhatsApp}
+              className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-lg font-semibold font-sans flex items-center justify-center gap-2"
+            >
+              <span>💬</span> Avisar pelo WhatsApp
+            </button>
+            <button
+              onClick={() => router.push("/")}
+              className="w-full px-6 py-3 bg-[#3e503c] text-white rounded-lg hover:bg-[#2c3b2a] transition-colors font-sans"
+            >
+              Voltar ao início
+            </button>
+          </div>
+        </div>
+      )}
+
+      {status === "pending" && (
+        <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8 text-center">
+          <div className="text-6xl mb-4">⏳</div>
+          <h1 className="text-3xl font-serif italic text-[#3e503c] mb-2">
+            Pagamento em processamento
+          </h1>
+          <p className="text-[#3e503c] font-sans mb-6">
+            Obrigado, <span className="font-semibold">{result?.guestName}</span>! Seu pagamento
+            está sendo processado. Assim que for confirmado, os presentes serão reservados automaticamente. 💚
+          </p>
+
+          {result?.gifts && result.gifts.filter((g) => g.success).length > 0 && (
+            <div className="bg-[#fef9e7] border border-[#f0e4a8] rounded-lg p-4 mb-6 text-left">
+              <p className="text-sm font-semibold text-[#3e503c] mb-2">Presentes reservados (aguardando confirmação):</p>
+              <ul className="space-y-1">
+                {result.gifts
+                  .filter((g) => g.success)
+                  .map((g) => (
+                    <li key={g.id} className="text-sm text-[#3e503c] font-sans">
+                      ⏳ {g.name || g.id}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+
+          <p className="text-sm text-[#3e503c] font-sans mb-6">
+            Se pagou via Pix ou boleto, avise os noivos pelo WhatsApp para que saibam! 😊
           </p>
 
           <div className="flex flex-col gap-3">

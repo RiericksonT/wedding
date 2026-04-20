@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
   const externalReference = request.nextUrl.searchParams.get('external_reference');
   const paymentId = request.nextUrl.searchParams.get('payment_id');
 
-  if (status !== 'approved' || !externalReference) {
+  if ((status !== 'approved' && status !== 'pending') || !externalReference) {
     return NextResponse.json({ error: 'Pagamento não aprovado ou referência ausente' }, { status: 400 });
   }
 

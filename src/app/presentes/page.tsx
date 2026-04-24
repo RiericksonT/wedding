@@ -450,8 +450,6 @@ export default function Presentes() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {otherGifts.map((option) => {
                 const isReserved = option.status === "reserved" || option.status === "purchased";
-                const quotaValue = option.quotaValue || Number((option.estimatedValue / (option.quotasTotal || 6)).toFixed(2));
-                const quotasRemaining = option.quotasRemaining ?? option.quotasTotal ?? 6;
 
                 return (
                   <div
@@ -477,14 +475,6 @@ export default function Presentes() {
                       {option.description}
                     </p>
 
-                    {option.isQuotaEligible && (
-                      <p className="text-sm text-[#2c3b2a] mt-2 font-sans font-semibold bg-[#eef4ed] border border-[#c9d8c6] rounded px-2 py-1 inline-block">
-                        {isReserved
-                          ? "Cotas esgotadas"
-                          : `${quotasRemaining} cota(s) restantes • ${option.quotasTotal || 6}x de R$ ${quotaValue.toFixed(2).replace(".", ",")}`}
-                      </p>
-                    )}
-
                     <div className="mt-4 flex items-center justify-between gap-3">
                       <span className="text-xl font-bold text-[#3e503c] font-sans">
                         R$ {option.estimatedValue.toFixed(2).replace(".", ",")}
@@ -496,7 +486,7 @@ export default function Presentes() {
                           handleAddGift({
                             furnitureId: "OutrosCategoria",
                             furnitureName: "Outros",
-                            option,
+                            option: { ...option, isQuotaEligible: false },
                           })
                         }
                         disabled={isReserved}
